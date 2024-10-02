@@ -21,5 +21,7 @@ public class Discount {
 
     private String code;
 
+    private Integer quantityLeft;
+
     private BigDecimal discount; // Use BigDecimal for monetary values
 }
