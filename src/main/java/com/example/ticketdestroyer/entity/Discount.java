@@ -23,5 +23,5 @@ public class Discount {
 
     private Integer quantityLeft;
 
-    private BigDecimal discount; // Use BigDecimal for monetary values
+    private BigDecimal percentage; // Use BigDecimal for monetary values
 }
