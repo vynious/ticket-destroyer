@@ -13,6 +13,10 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "concert_id", nullable = false)
+    private Concert concert;
+
     private String category;
 
     private String number;
