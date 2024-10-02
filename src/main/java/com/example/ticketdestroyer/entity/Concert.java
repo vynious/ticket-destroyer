@@ -21,6 +21,6 @@ public class Concert {
     private String location;
 
     @OneToMany(mappedBy = "concert", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Seat> seats;
+    private List<Ticket> tickets;
 
 }

@@ -17,8 +17,8 @@ public class Booking {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "seat_id", nullable = false)
-    private Seat seat;
+    @JoinColumn(name = "ticket_id", nullable = false)
+    private Ticket ticket;
 
     @ManyToOne
     @JoinColumn(name = "booker_id", nullable = false)
