@@ -25,7 +25,7 @@ public class Booking {
     private Booker booker;
 
     @ManyToOne
-    @JoinColumn(name = "promocode_id")
+    @JoinColumn(name = "discount_id")
     private Discount discount;
 
     private LocalDateTime time;
