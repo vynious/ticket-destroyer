@@ -1,4 +1,7 @@
-import Booking;
+package apd.booking;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Booker {
     private int id;

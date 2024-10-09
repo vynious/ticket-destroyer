@@ -1,6 +1,7 @@
+package apd.lock;
+
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.StampedLock;
 
 public class LockFactory {
     private static final ConcurrentHashMap<String, StampedLock> lockMap = new ConcurrentHashMap<>();

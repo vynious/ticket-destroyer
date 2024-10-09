@@ -1,3 +1,5 @@
+package apd.booking;
+
 public class PendingState implements BookingState {
     @Override
     public void handleRequest(Booking booking) {

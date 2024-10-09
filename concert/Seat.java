@@ -1,27 +1,27 @@
-import concert.*;
+package apd.concert;
+
+import java.util.concurrent.locks.StampedLock;
 
 public class Seat {
     private int id;
     private boolean isAvailable;
     private String category;
-    private Concert concert;
     private final StampedLock stampedLock = new StampedLock();
 
-    public Seat(int id, String category, Concert concert) {
+    public Seat(int id, String category) {
         this.id = id;
         this.isAvailable = true;
         this.category = category;
-        this.concert = concert;
     }
 
     public boolean bookSeat() {
         long stamp = stampedLock.tryOptimisticRead(); // Start with an optimistic read
-        boolean isBooked = !seatAvailable;
+        boolean isBooked = !isAvailable;
 
         if (!stampedLock.validate(stamp)) { // Validate that the optimistic read was not interrupted
             stamp = stampedLock.readLock(); // Fallback to a read lock if optimistic read fails
             try {
-                isBooked = !seatAvailable;
+                isBooked = !isAvailable;
             } finally {
                 stampedLock.unlockRead(stamp);
             }
@@ -30,8 +30,8 @@ public class Seat {
         if (!isBooked) { // If the seat is available, upgrade to a write lock to book it
             stamp = stampedLock.writeLock();
             try {
-                if (seatAvailable) { // Double-check the seat status to ensure it's still available
-                    seatAvailable = false;
+                if (isAvailable) { // Double-check the seat status to ensure it's still available
+                    isAvailable = false;
                     return true; // Successfully booked the seat
                 }
             } finally {
@@ -44,12 +44,12 @@ public class Seat {
 
     public boolean isSeatAvailable() {
         long stamp = stampedLock.tryOptimisticRead(); // Optimistically read the seat's availability status
-        boolean available = seatAvailable;
+        boolean available = isAvailable;
 
         if (!stampedLock.validate(stamp)) { // Validate the optimistic read
             stamp = stampedLock.readLock(); // Fallback to a read lock if validation fails
             try {
-                available = seatAvailable;
+                available = isAvailable;
             } finally {
                 stampedLock.unlockRead(stamp);
             }
@@ -66,5 +66,4 @@ public class Seat {
     public int getId() { return id; }
     public boolean getIsAvailable() { return isAvailable; }
     public String getCategory() { return category; }
-    public Concert getConcert() { return concert; }
 }

@@ -1,5 +1,11 @@
+package apd.booking;
+
+import apd.booking.*;
+import apd.concert.*;
+
 import java.util.Date;
-import concert.*;
+import java.util.List;
+
 
 public class Booking {
     private int id;

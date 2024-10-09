@@ -1,6 +1,8 @@
+package apd.concert;
+
 import java.util.HashMap;
 import java.util.Map;
-import lock.*;
+import apd.lock.*;
 
 public class Concert {
     private final int id; // Required
@@ -31,20 +33,21 @@ public class Concert {
     public void minusSeat() {
         if (seatsAvailable > 0) {
             seatsAvailable--;
-            this.totalSeats--;
         }
     }
 
     public void addSeat() {
-        this.totalSeats++;
-        this.seatsAvailable++;
+        if (seatsAvailable < totalSeats) {
+            this.seatsAvailable++;
+
+        }
     }
 
     private void seedSeats() {
         for (int i = 1; i <= this.totalSeats; i++) {
             int catNum = (i + 19) / 20; // Categorize seats based on number
             String category = "CAT" + catNum;
-            seatMap.put(i, new Seat(i, i, category));
+            seatMap.put(i, new Seat(i, category));
         }
     }
 

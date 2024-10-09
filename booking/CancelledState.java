@@ -1,3 +1,5 @@
+package apd.booking;
+
 public class CancelledState implements BookingState {
     @Override
     public void handleRequest(Booking booking) {
