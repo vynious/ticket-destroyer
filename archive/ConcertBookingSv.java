@@ -23,12 +23,12 @@
 //         return false;
 //     }
 
-//     // Scenario 3: Booking multiple adjacent seats (group booking)
+//     // Scenario 3: Booking multiple adjacent seats (group apd.booking)
 //     public boolean reserveAdjacentSeats(int[] seatIds) {
 //         // Check if all seats are available
 //         for (int seatId : seatIds) {
 //             if (!seatAvailability.getOrDefault(seatId, false) || groupSeatLocks.get(seatId)) {
-//                 return false;  // If any seat is not available, booking fails
+//                 return false;  // If any seat is not available, apd.booking fails
 //             }
 //         }
 
@@ -40,7 +40,7 @@
 //         return true;
 //     }
 
-//     // Scenario 4: Cancel booking and make seat available again
+//     // Scenario 4: Cancel apd.booking and make seat available again
 //     public synchronized boolean cancelSeat(int seatId) {
 //         if (!seatAvailability.getOrDefault(seatId, true)) {
 //             seatAvailability.put(seatId, true);  // Seat is now available

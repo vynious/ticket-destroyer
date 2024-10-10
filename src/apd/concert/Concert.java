@@ -20,7 +20,7 @@ public class Concert {
         this.seedSeats();
     }
 
-    // Thread-safe method to book a seat in the concert
+    // Thread-safe method to book a seat in the apd.concert
     public boolean bookSeat(int seatId) {
         Seat seat = seatMap.get(seatId);
         if (seat != null) {
@@ -62,6 +62,10 @@ public class Concert {
 
     public int getSeatsAvailable() {
         return seatsAvailable;
+    }
+
+    public Seat getSeatById(int seatId) {
+        return seatMap.get(seatId);
     }
 
     public static class ConcertBuilder {

@@ -29,9 +29,9 @@ public class Booking {
     }
 
     // CRUD methods
-    public void saveBooking() { /* Save booking logic */ }
-    public void deleteBooking() { /* Delete booking logic */ }
-    public void updateBooking() { /* Update booking logic */ }
+    public void saveBooking() { /* Save apd.booking logic */ }
+    public void deleteBooking() { /* Delete apd.booking logic */ }
+    public void updateBooking() { /* Update apd.booking logic */ }
 
     // Getters
     public int getId() { return id; }

@@ -19,7 +19,7 @@ public class Seat {
         boolean isBooked = !isAvailable;
 
         if (!stampedLock.validate(stamp)) { // Validate that the optimistic read was not interrupted
-            stamp = stampedLock.readLock(); // Fallback to a read lock if optimistic read fails
+            stamp = stampedLock.readLock(); // Fallback to a read apd.lock if optimistic read fails
             try {
                 isBooked = !isAvailable;
             } finally {
@@ -27,7 +27,7 @@ public class Seat {
             }
         }
 
-        if (!isBooked) { // If the seat is available, upgrade to a write lock to book it
+        if (!isBooked) { // If the seat is available, upgrade to a write apd.lock to book it
             stamp = stampedLock.writeLock();
             try {
                 if (isAvailable) { // Double-check the seat status to ensure it's still available
@@ -35,11 +35,11 @@ public class Seat {
                     return true; // Successfully booked the seat
                 }
             } finally {
-                stampedLock.unlockWrite(stamp); // Release the write lock
+                stampedLock.unlockWrite(stamp); // Release the write apd.lock
             }
         }
 
-        return false; // Seat was already booked or booking failed
+        return false; // Seat was already booked or apd.booking failed
     }
 
     public boolean isSeatAvailable() {
@@ -47,7 +47,7 @@ public class Seat {
         boolean available = isAvailable;
 
         if (!stampedLock.validate(stamp)) { // Validate the optimistic read
-            stamp = stampedLock.readLock(); // Fallback to a read lock if validation fails
+            stamp = stampedLock.readLock(); // Fallback to a read apd.lock if validation fails
             try {
                 available = isAvailable;
             } finally {
