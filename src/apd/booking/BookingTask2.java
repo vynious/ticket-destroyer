@@ -47,7 +47,7 @@ public class BookingTask2 implements Callable<List<Booking>> {
                     // Seat booking successful, add it to Booker's list of bookings
                     Booking newBooking = new Booking(booker.getId(), concert.getId(), seatId);
                     booker.addBooking(newBooking);
-                    System.out.println(Thread.currentThread().getName() + " successfully booked seat " + seatId);
+                    System.out.println(booker.getName() + " successfully booked seat " + seatId);
                 }
             }
         } finally {
