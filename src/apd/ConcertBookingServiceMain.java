@@ -4,6 +4,7 @@ import apd.booking.Booking;
 import apd.concert.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -29,15 +30,21 @@ public class ConcertBookingServiceMain {
      * @param seatId The ID of the seat to book.
      * @return Future<Boolean> indicating success (true) or failure (false) of the apd.booking.
      */
-    public Future<Boolean> bookSeat(int bookerId, int concertId, int seatId) {
+    public Future<String> bookSeat(int bookerId, int concertId, int seatId) {
         return executorService.submit(() -> {
             try {
                 boolean success = concert.bookSeat(seatId);
+                String resultMessage;
                 if (success) {
                     bookingCounter.incrementAndGet();
                     Booking booking = new Booking(bookingCounter.get(), bookerId, concertId, seatId);
+                    resultMessage = String.format("%s, Booker ID %d: Seat ID %d - Successful. Seats Left: %d", new Date().getTime(),
+                            bookerId, seatId, concert.getSeatsAvailable());
+                } else {
+                    resultMessage = String.format("%s Booker ID %d: Seat ID %d - Failed. Seats Left: %d", new Date().getTime(),
+                            bookerId, seatId, concert.getSeatsAvailable());
                 }
-                return success;
+                return resultMessage;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -55,6 +62,7 @@ public class ConcertBookingServiceMain {
         int threadCount = 1000;
         int totalSeats = 100;
         int bookingAttempts = 100;
+        int noOfBookers = 100;
 
         int simulateNoOfSeats = 1;
 
@@ -62,13 +70,13 @@ public class ConcertBookingServiceMain {
         ConcertBookingServiceMain bookingService = new ConcertBookingServiceMain(concert, threadCount); // Using 10 threads
 
         // Simulate multiple seat apd.booking attempts
-        List<Future<Boolean>> results = new ArrayList<>();
+        List<Future<String>> results = new ArrayList<>();
         List<Integer> seatIds = new ArrayList<>();
         Random random = new Random();
 
         // Create bookers for testing
         List<Booker> bookers = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= noOfBookers; i++) {
             bookers.add(new Booker(i, "Booker_" + i));
         }
 
@@ -85,8 +93,9 @@ public class ConcertBookingServiceMain {
         for (int i = 0; i < results.size(); i++) {
             int seatId = seatIds.get(i); // Retrieve the seatId for the current attempt
             try {
-                boolean success = results.get(i).get(); // Retrieve the apd.booking result from each future
-                System.out.println("Attempt " + (i + 1) + ": Seat ID " + seatId + " - " + (success ? "Success" : "Failed"));
+                String res = results.get(i).get(); // Retrieve the apd.booking result from each future
+                //System.out.println("Attempt " + (i + 1) + ": Seat ID " + seatId + " - " + (success ? "Success" : "Failed"));
+                System.out.println(res);
             } catch (Exception e) {
                 System.err.println("Error during apd.booking attempt " + (i + 1) + ": " + e.getMessage());
             }
