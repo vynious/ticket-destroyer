@@ -9,12 +9,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class TimeDelayLocking {
+public class Scenario3 {
 
     private final Concert concert;
     private final ExecutorService execSvc;
 
-    public TimeDelayLocking(Concert concert, int numOfThreads) {
+    public Scenario3(Concert concert, int numOfThreads) {
         this.concert = concert;
         this.execSvc = Executors.newFixedThreadPool(numOfThreads);
     }
@@ -60,11 +60,11 @@ public class TimeDelayLocking {
         *       - release lock for seat
         * */
 
-        int numOfBookers = 5;
-        int numOfSeats = 3;
+        int numOfBookers = 100;
+        int numOfSeats = 20;
 
         Concert concert = new Concert.ConcertBuilder(2, numOfSeats).build();
-        TimeDelayLocking timeDelayLocking = new TimeDelayLocking(concert, numOfBookers);
+        Scenario3 timeDelayLocking = new Scenario3(concert, numOfBookers);
 
         List<Future<String>> results = new ArrayList<>();
 
