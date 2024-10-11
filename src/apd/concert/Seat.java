@@ -1,5 +1,6 @@
 package apd.concert;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
 
 public class Seat {
@@ -14,56 +15,52 @@ public class Seat {
         this.category = category;
     }
 
-    public boolean bookSeat() {
-        long stamp = stampedLock.tryOptimisticRead(); // Start with an optimistic read
-        boolean isBooked = !isAvailable;
-
-        if (!stampedLock.validate(stamp)) { // Validate that the optimistic read was not interrupted
-            stamp = stampedLock.readLock(); // Fallback to a read apd.lock if optimistic read fails
-            try {
-                isBooked = !isAvailable;
-            } finally {
-                stampedLock.unlockRead(stamp);
+    public boolean bookSeat() throws InterruptedException {
+        long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
+        try {
+            if (isAvailable) { // Check if the seat is still available
+                Thread.sleep(10);
+                isAvailable = false; // Mark the seat as booked
+                return true; // Successfully booked the seat
             }
+        } finally {
+            stampedLock.unlockWrite(stamp); // Release the write lock
         }
-
-        if (!isBooked) { // If the seat is available, upgrade to a write apd.lock to book it
-            stamp = stampedLock.writeLock();
-            try {
-                if (isAvailable) { // Double-check the seat status to ensure it's still available
-                    isAvailable = false;
-                    return true; // Successfully booked the seat
-                }
-            } finally {
-                stampedLock.unlockWrite(stamp); // Release the write apd.lock
-            }
-        }
-
-        return false; // Seat was already booked or apd.booking failed
+        return false; // Seat was already booked
     }
 
-    public boolean isSeatAvailable() {
-        long stamp = stampedLock.tryOptimisticRead(); // Optimistically read the seat's availability status
-        boolean available = isAvailable;
-
-        if (!stampedLock.validate(stamp)) { // Validate the optimistic read
-            stamp = stampedLock.readLock(); // Fallback to a read apd.lock if validation fails
-            try {
-                available = isAvailable;
-            } finally {
-                stampedLock.unlockRead(stamp);
-            }
+    public boolean bookSeatNotSafe() throws InterruptedException {
+        if (isAvailable) { // Check if the seat is available
+            Thread.sleep(10);
+            isAvailable = false; // Mark the seat as booked
+            return true;
         }
+        return false; // Seat was already booked
+    }
 
-        return available;
+    public boolean cancelSeat() {
+        long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
+        try {
+            if (!isAvailable) { // Check if the seat is currently booked
+                isAvailable = true; // Mark the seat as available
+                return true; // Successfully canceled the booking
+            }
+        } finally {
+            stampedLock.unlockWrite(stamp); // Release the write lock
+        }
+        return false; // Seat was not booked, so cancellation failed
     }
 
     public void updateIsAvailable(boolean availability) {
-        this.isAvailable = availability;
+        isAvailable = availability;
     }
 
     // Getters and setters
     public int getId() { return id; }
     public boolean getIsAvailable() { return isAvailable; }
     public String getCategory() { return category; }
+
+    public StampedLock getLock() {
+        return this.stampedLock;
+    }
 }

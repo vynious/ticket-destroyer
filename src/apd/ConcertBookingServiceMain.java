@@ -1,4 +1,6 @@
 package apd;
+import apd.booking.Booker;
+import apd.booking.Booking;
 import apd.concert.*;
 
 import java.util.ArrayList;
@@ -7,11 +9,14 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConcertBookingServiceMain {
 
     private final Concert concert;
     private final ExecutorService executorService;
+
+    private AtomicInteger bookingCounter = new AtomicInteger(0);
 
     public ConcertBookingServiceMain(Concert concert, int numberOfThreads) {
         this.concert = concert;
@@ -24,13 +29,18 @@ public class ConcertBookingServiceMain {
      * @param seatId The ID of the seat to book.
      * @return Future<Boolean> indicating success (true) or failure (false) of the apd.booking.
      */
-    public Future<Boolean> bookSeat(int seatId) {
+    public Future<Boolean> bookSeat(int bookerId, int concertId, int seatId) {
         return executorService.submit(() -> {
-            Seat seat = concert.getSeatById(seatId);
-            if (seat != null) {
-                return seat.bookSeat(); // Attempt to book the seat using optimistic locking
+            try {
+                boolean success = concert.bookSeat(seatId);
+                if (success) {
+                    bookingCounter.incrementAndGet();
+                    Booking booking = new Booking(bookingCounter.get(), bookerId, concertId, seatId);
+                }
+                return success;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-            return false; // Return false if seat doesn't exist
         });
     }
 
@@ -42,9 +52,11 @@ public class ConcertBookingServiceMain {
     }
 
     public static void main(String[] args) {
-        int threadCount = 10;
+        int threadCount = 1000;
         int totalSeats = 100;
-        int noOfUsers = 100;
+        int bookingAttempts = 100;
+
+        int simulateNoOfSeats = 1;
 
         Concert concert = new Concert.ConcertBuilder(1, totalSeats).build();
         ConcertBookingServiceMain bookingService = new ConcertBookingServiceMain(concert, threadCount); // Using 10 threads
@@ -54,11 +66,19 @@ public class ConcertBookingServiceMain {
         List<Integer> seatIds = new ArrayList<>();
         Random random = new Random();
 
+        // Create bookers for testing
+        List<Booker> bookers = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            bookers.add(new Booker(i, "Booker_" + i));
+        }
+
         // Create high contention for seats 1-10
-        for (int i = 0; i < noOfUsers; i++) { // Try to book the same seat multiple times concurrently
-            int seatId = random.nextInt(10) + 1;
+        for (int i = 0; i < bookingAttempts; i++) { // Try to book the same seat multiple times concurrently
+            int seatId = random.nextInt(simulateNoOfSeats) + 1;
             seatIds.add(seatId);
-            results.add(bookingService.bookSeat(seatId));
+            Booker booker = bookers.get(random.nextInt(bookers.size()));
+
+            results.add(bookingService.bookSeat(booker.getId(), concert.getId(), seatId));
         }
 
         // Check the results of apd.booking attempts

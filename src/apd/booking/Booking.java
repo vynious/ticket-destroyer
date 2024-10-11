@@ -3,21 +3,27 @@ package apd.booking;
 import apd.booking.*;
 import apd.concert.*;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 
 public class Booking {
     private int id;
+    private int bookerId;
+    private int concertId;
+    private int seatId;
     private Date timestamp;
     private BookingState state;
-    private List<Seat> seats;
 
-    public Booking(int id, Date timestamp, List<Seat> seats) {
+    public Booking(int id, int bookerId, int concertId, int seatId) {
         this.id = id;
-        this.timestamp = timestamp;
+        this.bookerId = bookerId;
+        this.concertId = concertId;
+        this.seatId = seatId;
+
         this.state = new PendingState();  // Start with PendingState
-        this.seats = seats;
+        this.timestamp = new Date();
     }
 
     public void setState(BookingState state) {
@@ -36,4 +42,16 @@ public class Booking {
     // Getters
     public int getId() { return id; }
     public Date getTimestamp() { return timestamp; }
+
+    public int getConcertId() {
+        return concertId;
+    }
+
+    public int getSeatId() {
+        return seatId;
+    }
+
+    public int getBookerId() {
+        return bookerId;
+    }
 }
