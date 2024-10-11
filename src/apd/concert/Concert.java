@@ -102,6 +102,27 @@ public class Concert {
     public int getSeatsAvailable() {
         return seatsAvailable.get();
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Concert ID: ").append(id)
+        .append("\nTotal Seats: ").append(totalSeats)
+        .append("\nSeats Available: ").append(seatsAvailable)
+        .append("\nSeat Distribution:\n");
+
+        // Group seats by category and display them
+        Map<String, Integer> seatCategories = new HashMap<>();
+        for (Seat seat : seatMap.values()) {
+            seatCategories.put(seat.getCategory(), seatCategories.getOrDefault(seat.getCategory(), 0) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : seatCategories.entrySet()) {
+            sb.append(entry.getKey()).append(": ").append(entry.getValue()).append(" seats\n");
+        }
+
+        return sb.toString();
+    }
 
     public static class ConcertBuilder {
         private final int id; // Required
