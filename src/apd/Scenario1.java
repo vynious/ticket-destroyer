@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ConcertBookingServiceMain {
+public class Scenario1 {
 
     private final Concert concert;
     private final ExecutorService executorService;
@@ -19,7 +19,7 @@ public class ConcertBookingServiceMain {
 
     private AtomicInteger bookingCounter = new AtomicInteger(0);
 
-    public ConcertBookingServiceMain(Concert concert, int numberOfThreads, boolean threadSafe) {
+    public Scenario1(Concert concert, int numberOfThreads, boolean threadSafe) {
         this.concert = concert;
         this.executorService = Executors.newFixedThreadPool(numberOfThreads); // Thread pool for concurrent apd.booking
         this.threadSafe = threadSafe;
@@ -64,7 +64,7 @@ public class ConcertBookingServiceMain {
         executorService.shutdown();
     }
 
-    public void runBookingSimulation(int totalSeats, int noOfBookers, int bookingAttempts, int contestSeats, ConcertBookingServiceMain bookingServiceMain) {
+    public void runBookingSimulation(int noOfBookers, int bookingAttempts, int contestSeats, Scenario1 bookingServiceMain) {
         // Simulate multiple seat apd.booking attempts
         List<Future<String>> results = new ArrayList<>();
         Random random = new Random();
@@ -102,19 +102,20 @@ public class ConcertBookingServiceMain {
         int bookingAttempts = 100;
         int noOfBookers = 100;
 
-        int contestSeats = 1;
+        int contestSeats = 5;
 
-        Concert concert = new Concert.ConcertBuilder(1, totalSeats).build();
-
-        System.out.println("------- SAFE -------");
-        ConcertBookingServiceMain threadSafeBookingSvc = new ConcertBookingServiceMain(concert, threadCount, true); // Using 10 threads
-        threadSafeBookingSvc.runBookingSimulation(totalSeats, noOfBookers, bookingAttempts, contestSeats, threadSafeBookingSvc);
-
-        System.out.println();
 
         System.out.println("------- NOT SAFE -------");
         Concert concert2 = new Concert.ConcertBuilder(1, totalSeats).build();
-        ConcertBookingServiceMain threadNotSafeBookingSvc = new ConcertBookingServiceMain(concert2, threadCount, false); // Using 10 threads
-        threadNotSafeBookingSvc.runBookingSimulation(totalSeats, noOfBookers, bookingAttempts, contestSeats, threadNotSafeBookingSvc);
+        Scenario1 threadNotSafeBookingSvc = new Scenario1(concert2, threadCount, false); // Using 10 threads
+        threadNotSafeBookingSvc.runBookingSimulation(noOfBookers, bookingAttempts, contestSeats, threadNotSafeBookingSvc);
+
+        System.out.println();
+
+        System.out.println("------- SAFE -------");
+        Concert concert = new Concert.ConcertBuilder(1, totalSeats).build();
+        Scenario1 threadSafeBookingSvc = new Scenario1(concert, threadCount, true); // Using 10 threads
+        threadSafeBookingSvc.runBookingSimulation(noOfBookers, bookingAttempts, contestSeats, threadSafeBookingSvc);
+
     }
 }

@@ -39,16 +39,6 @@ public class Concert {
         return false; // Seat was already booked or does not exist
     }
 
-    // Thread-safe method to cancel a seat in the concert
-    public boolean cancelSeat(int seatId) {
-        Seat seat = seatMap.get(seatId);
-        if (seat != null && seat.cancelSeat()) { // Attempt to cancel the booking using the Seat class's method
-            seatsAvailable.incrementAndGet(); // Increment the count of available seats if cancellation is successful
-            return true;
-        }
-        return false; // Seat was not booked or does not exist
-    }
-
     public boolean bookSeatNotSafe(int seatId) throws InterruptedException {
         Seat seat = seatMap.get(seatId);
         boolean success = seat.bookSeatNotSafe();
