@@ -9,10 +9,10 @@ import java.util.Date;
 
 
 public class Booking {
-    private int bookerId;
-    private int concertId;
-    private int seatId;
-    private Date timestamp;
+    private final int bookerId;
+    private final int concertId;
+    private final int seatId;
+    private final Date timestamp;
 
     public Booking(int bookerId, int concertId, int seatId) {
         this.bookerId = bookerId;

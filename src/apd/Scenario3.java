@@ -31,21 +31,7 @@ public class Scenario3 {
         *   2. after each thread manages to get hold of a seat (lock)
         *   3. initiate countdown to release the seat lock
         *   4. case 1: [successful booking]
-        *       - creates a booking entry
-        *       - set booking state to pending
-        *       - thread manages to book and check out seats
-        *       - set booking state to success
-        *       - update booking class details
-        *       - update the concert seat map
-        *       - release lock for seat
         *   5. case 2: [unsuccessful booking]
-        *       - creates a booking entry
-        *       - set booking state to pending
-        *       - thread fails to book and checkout seats
-        *       - set booking state to canceled
-        *       - update booking class details
-        *       - no change to concert seat map
-        *       - release lock for seat
         * */
 
         int numOfBookers = 5;

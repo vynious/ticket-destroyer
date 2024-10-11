@@ -130,6 +130,4 @@ public class Concert {
             return new Concert(this);
         }
     }
-
-    // ======= Booking Functionalities ========= //
 }

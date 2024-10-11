@@ -3,7 +3,6 @@ package apd.booking;
 import apd.concert.Concert;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BookingTask1 implements Callable<String> {
@@ -11,8 +10,8 @@ public class BookingTask1 implements Callable<String> {
     private final Booker booker;
     private final Concert concert;
     private final int seatId;
-    private boolean threadSafe;
-    private AtomicInteger bookingCounter = new AtomicInteger(0);
+    private final boolean threadSafe;
+    private final AtomicInteger bookingCounter = new AtomicInteger(0);
 
 
     public BookingTask1(Booker booker, Concert concert, int seatId, boolean threadSafe) {

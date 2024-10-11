@@ -21,7 +21,7 @@ public class Seat {
     }
 
     public boolean bookSeat() throws InterruptedException {
-        StampedLock stampedLock = LockFactory.getLock(name);
+        StampedLock stampedLock = this.getLock(name);
         long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
         try {
             if (isAvailable) { // Check if the seat is still available
@@ -45,7 +45,7 @@ public class Seat {
     }
 
     public boolean cancelSeat() {
-        StampedLock stampedLock = LockFactory.getLock(name);
+        StampedLock stampedLock = this.getLock(name);
         long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
         try {
             if (!isAvailable) { // Check if the seat is currently booked
@@ -59,20 +59,16 @@ public class Seat {
     }
 
     // Getters and setters
-    public int getId() { return id; }
     public String getName() {return name;}
-
-    public boolean getIsAvailable() { return isAvailable; }
     public String getCategory() { return category; }
-
-    public StampedLock getLock() {
+    public StampedLock getLock(String name) {
         return LockFactory.getLock(name);
     }
 
 
     public boolean bookSeatWithTDL(Booker booker) throws InterruptedException {
         long stamp = 0L;
-        StampedLock stampedLock = LockFactory.getLock(name);
+        StampedLock stampedLock = this.getLock(name);
         try {
             // Try to acquire the write lock
             stamp = stampedLock.tryWriteLock(12, TimeUnit.MILLISECONDS);

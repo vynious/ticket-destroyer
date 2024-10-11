@@ -19,10 +19,12 @@ public class Scenario1 {
 
     private final Concert concert;
     private final ExecutorService executorService;;
+    private final boolean threadSafe;
 
     public Scenario1(Concert concert, int numberOfThreads, boolean threadSafe) {
         this.concert = concert;
         this.executorService = Executors.newFixedThreadPool(numberOfThreads); // Thread pool for concurrent apd.booking
+        this.threadSafe = threadSafe;
     }
 
     public Future<String> book(Callable<String> task) {
@@ -51,9 +53,7 @@ public class Scenario1 {
         for (int i = 0; i < bookingAttempts; i++) { // Try to book the same seat multiple times concurrently
             int seatId = random.nextInt(contestSeats) + 1;
             Booker booker = bookers.get(random.nextInt(bookers.size()));
-
-            BookingTask1 bt1 = new BookingTask1(booker, concert, seatId, true);
-
+            BookingTask1 bt1 = new BookingTask1(booker, concert, seatId, bookingServiceMain.threadSafe);
             results.add(book(bt1));
         }
 
@@ -68,11 +68,6 @@ public class Scenario1 {
         }
 
         bookingServiceMain.shutdown();
-
-        for (Booker booker : bookers) {
-            List<Booking> bookings = booker.getBookings();
-        }
-
     }
 
     public static void main(String[] args) {
