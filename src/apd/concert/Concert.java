@@ -6,10 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
-import apd.booking.Booker;
-import apd.booking.Booking;
-import apd.lock.*;
-
 public class Concert {
     private final int id; // Required
     private final int totalSeats; // Required
