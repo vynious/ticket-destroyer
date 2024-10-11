@@ -1,26 +1,25 @@
 package apd.concert;
 
+import apd.lock.LockFactory;
+
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
 
 public class Seat {
     private int id;
     private boolean isAvailable;
     private String category;
-    private final StampedLock stampedLock = new StampedLock();
-    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
     public Seat(int id, String category) {
         this.id = id;
         this.isAvailable = true;
         this.category = category;
-        
+
     }
 
     public boolean bookSeat() throws InterruptedException {
+        StampedLock stampedLock = LockFactory.getLock(id);
         long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
         try {
             if (isAvailable) { // Check if the seat is still available
@@ -44,6 +43,7 @@ public class Seat {
     }
 
     public boolean cancelSeat() {
+        StampedLock stampedLock = LockFactory.getLock(id);
         long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
         try {
             if (!isAvailable) { // Check if the seat is currently booked
@@ -56,43 +56,32 @@ public class Seat {
         return false; // Seat was not booked, so cancellation failed
     }
 
-    public void updateIsAvailable(boolean availability) {
-        isAvailable = availability;
-    }
-
     // Getters and setters
     public int getId() { return id; }
     public boolean getIsAvailable() { return isAvailable; }
     public String getCategory() { return category; }
 
     public StampedLock getLock() {
-        return this.stampedLock;
+        return LockFactory.getLock(id);
     }
 
-    public boolean isSeatAvailableTDL() {
-        readWriteLock.readLock().lock();
-        try {
-            return isAvailable;
-        } finally {
-            readWriteLock.readLock().unlock();
-        }
-    }
 
     public boolean bookSeatWithTDL() {
-        boolean contestable = false;
+        long stamp = 0L;
+        StampedLock stampedLock = LockFactory.getLock(id);
 
         try {
             // Try to acquire the write lock
+            stamp = stampedLock.tryWriteLock(12, TimeUnit.MILLISECONDS);
 
-            contestable = readWriteLock.writeLock().tryLock(12, TimeUnit.MILLISECONDS);
-
-            if (!contestable) {
+            if (stamp == 0L) {
                 System.out.println(Thread.currentThread().getName() + " failed to get lock for seat-" + this.id);
-                return false; // Could not acquire lock or seat is not available
+                return false; // Could not acquire lock
             }
 
-            if (!this.isSeatAvailableTDL()) {
-                System.out.println(Thread.currentThread().getName() + " got the lock for seat-" + this.id + " but its too late ~");
+            // Since we have the write lock, we can directly check isAvailable
+            if (!this.isAvailable) {
+                System.out.println(Thread.currentThread().getName() + " got the lock for seat-" + this.id + " but it's too late ~");
                 return false;
             }
 
@@ -103,7 +92,7 @@ public class Seat {
             // Simulate a chance of delay (e.g., due to network delay or user indecision)
             this.simulateBookingSession();
 
-            // Check if the total time taken exceeds the allowed 1000 ms (1 second)
+            // Check if the total time taken exceeds the allowed 10 ms
             if (System.currentTimeMillis() - startTime >= 10) {
                 return false; // Booking took too long, indicating timeout
             }
@@ -122,8 +111,8 @@ public class Seat {
 
         } finally {
             // Release the lock only if it was successfully acquired
-            if (contestable) {
-                readWriteLock.writeLock().unlock();
+            if (stamp != 0L) {
+                stampedLock.unlockWrite(stamp);
             }
         }
     }
