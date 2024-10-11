@@ -1,6 +1,7 @@
 package apd.booking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Booker {
@@ -17,4 +18,25 @@ public class Booker {
     // Getters
     public int getId() { return id; }
     public String getName() { return name; }
+
+    public void addBooking(Booking booking) {
+        bookings.add(booking);
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void removeBooking(int concertId, int seatId) {
+        int toRemove = -1;
+        for (Booking booking : bookings) {
+            if (booking.getConcertId() == concertId && booking.getSeatId() == seatId) {
+                toRemove = bookings.indexOf(booking);
+                break;
+            }
+        }
+        if (toRemove != -1) {
+            bookings.remove(toRemove);
+        }
+    }
 }
