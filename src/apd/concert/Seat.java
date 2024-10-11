@@ -71,19 +71,36 @@ public class Seat {
     public boolean getIsAvailable() { return isAvailable; }
     public String getCategory() { return category; }
 
+    public boolean isSeatAvailableTDL() {
+        readWriteLock.readLock().lock();
+        try {
+            return isAvailable;
+        } finally {
+            readWriteLock.readLock().unlock();
+        }
+    }
 
     public boolean bookSeatWithTDL() {
         boolean contestable = false;
 
         try {
             // Try to acquire the write lock
-            contestable = isAvailable && readWriteLock.writeLock().tryLock();
+
+            contestable = readWriteLock.writeLock().tryLock(12, TimeUnit.MILLISECONDS);
 
             if (!contestable) {
+                System.out.println(Thread.currentThread().getName() + " failed to get lock for seat-" + this.id);
                 return false; // Could not acquire lock or seat is not available
             }
 
+            if (!this.isSeatAvailableTDL()) {
+                System.out.println(Thread.currentThread().getName() + " got the lock for seat-" + this.id + " but its too late ~");
+                return false;
+            }
+
             long startTime = System.currentTimeMillis();
+
+            System.out.println(Thread.currentThread().getName() + " got the lock for seat-" + this.id);
 
             // Simulate a chance of delay (e.g., due to network delay or user indecision)
             this.simulateBookingSession();
@@ -94,7 +111,8 @@ public class Seat {
             }
 
             // Critical section: Mark the seat as booked
-            this.updateIsAvailable(false); // Set seat to not available
+            this.isAvailable = false; // Set seat to not available
+
             System.out.println(Thread.currentThread().getName() + " successfully booked the seat.");
             return true;
 

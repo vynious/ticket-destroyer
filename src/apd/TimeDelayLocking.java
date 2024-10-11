@@ -60,8 +60,8 @@ public class TimeDelayLocking {
         *       - release lock for seat
         * */
 
-        int numOfBookers = 10;
-        int numOfSeats = 5;
+        int numOfBookers = 100;
+        int numOfSeats = 30;
 
         Concert concert = new Concert.ConcertBuilder(2, numOfSeats).build();
         TimeDelayLocking timeDelayLocking = new TimeDelayLocking(concert, numOfBookers);
