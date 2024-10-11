@@ -1,5 +1,8 @@
 package apd.concert;
 
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.StampedLock;
 
 public class Seat {
@@ -7,6 +10,7 @@ public class Seat {
     private boolean isAvailable;
     private String category;
     private final StampedLock stampedLock = new StampedLock();
+    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
     public Seat(int id, String category) {
         this.id = id;
@@ -66,4 +70,56 @@ public class Seat {
     public int getId() { return id; }
     public boolean getIsAvailable() { return isAvailable; }
     public String getCategory() { return category; }
+
+
+    public boolean bookSeatWithTDL() {
+        boolean contestable = false;
+
+        try {
+            // Try to acquire the write lock
+            contestable = isAvailable && readWriteLock.writeLock().tryLock();
+
+            if (!contestable) {
+                return false; // Could not acquire lock or seat is not available
+            }
+
+            long startTime = System.currentTimeMillis();
+
+            // Simulate a chance of delay (e.g., due to network delay or user indecision)
+            this.simulateBookingSession();
+
+            // Check if the total time taken exceeds the allowed 1000 ms (1 second)
+            if (System.currentTimeMillis() - startTime >= 10) {
+                return false; // Booking took too long, indicating timeout
+            }
+
+            // Critical section: Mark the seat as booked
+            this.updateIsAvailable(false); // Set seat to not available
+            System.out.println(Thread.currentThread().getName() + " successfully booked the seat.");
+            return true;
+
+        } catch (InterruptedException e) {
+            // Restore the interrupted status to handle it properly
+            Thread.currentThread().interrupt();
+            System.out.println(Thread.currentThread().getName() + " was interrupted during booking.");
+            return false;
+
+        } finally {
+            // Release the lock only if it was successfully acquired
+            if (contestable) {
+                readWriteLock.writeLock().unlock();
+            }
+        }
+    }
+
+    public void simulateBookingSession() throws InterruptedException {
+        Random rand = new Random();
+        boolean simulateTimeout = rand.nextBoolean();
+
+        // Randomly decide if booking session should simulate a delay (50% chance)
+        if (simulateTimeout) {
+            System.out.println(Thread.currentThread().getName() + " is experiencing a delay...");
+            Thread.sleep(10); // Introduce delay of 10 ms
+        }
+    }
 }
