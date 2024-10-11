@@ -51,8 +51,11 @@ public class Concert {
 
     public boolean bookSeatNotSafe(int seatId) throws InterruptedException {
         Seat seat = seatMap.get(seatId);
-        seatsAvailable.decrementAndGet();
-        return seat.bookSeatNotSafe();
+        boolean success = seat.bookSeatNotSafe();
+        if (success) {
+            seatsAvailable.decrementAndGet();
+        }
+        return success;
     }
 
     public void minusSeat() {
