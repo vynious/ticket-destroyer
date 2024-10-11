@@ -7,7 +7,7 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
 public class LockFactory {
-    private static final ConcurrentHashMap<Integer, StampedLock> lockMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, StampedLock> lockMap = new ConcurrentHashMap<>();
 
     /**
      * Method to get or create a lock for a given resource identifier.
@@ -16,7 +16,7 @@ public class LockFactory {
      * @param resourceId The ID of the resource for which the lock is requested.
      * @return The lock associated with the given resource.
      */
-    public static StampedLock getLock(int resourceId) {
+    public static StampedLock getLock(String resourceId) {
         return lockMap.computeIfAbsent(resourceId, key -> new StampedLock());
     }
 

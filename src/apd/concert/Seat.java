@@ -1,5 +1,6 @@
 package apd.concert;
 
+import apd.booking.Booker;
 import apd.lock.LockFactory;
 
 import java.util.Random;
@@ -7,24 +8,25 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.StampedLock;
 
 public class Seat {
-    private int id;
+    private final int id;
     private boolean isAvailable;
-    private String category;
+    private final String category;
+    private final String name;
 
     public Seat(int id, String category) {
         this.id = id;
         this.isAvailable = true;
         this.category = category;
-
+        this.name = "seat-" + id;
     }
 
     public boolean bookSeat() throws InterruptedException {
-        StampedLock stampedLock = LockFactory.getLock(id);
+        StampedLock stampedLock = LockFactory.getLock(name);
         long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
         try {
             if (isAvailable) { // Check if the seat is still available
                 Thread.sleep(10);
-                isAvailable = false; // Mark the seat as booked
+                 isAvailable = false; // Mark the seat as booked
                 return true; // Successfully booked the seat
             }
         } finally {
@@ -43,7 +45,7 @@ public class Seat {
     }
 
     public boolean cancelSeat() {
-        StampedLock stampedLock = LockFactory.getLock(id);
+        StampedLock stampedLock = LockFactory.getLock(name);
         long stamp = stampedLock.writeLock(); // Directly acquire a write lock to ensure thread safety
         try {
             if (!isAvailable) { // Check if the seat is currently booked
@@ -58,39 +60,40 @@ public class Seat {
 
     // Getters and setters
     public int getId() { return id; }
+    public String getName() {return name;}
+
     public boolean getIsAvailable() { return isAvailable; }
     public String getCategory() { return category; }
 
     public StampedLock getLock() {
-        return LockFactory.getLock(id);
+        return LockFactory.getLock(name);
     }
 
 
-    public boolean bookSeatWithTDL() {
+    public boolean bookSeatWithTDL(Booker booker) throws InterruptedException {
         long stamp = 0L;
-        StampedLock stampedLock = LockFactory.getLock(id);
-
+        StampedLock stampedLock = LockFactory.getLock(name);
         try {
             // Try to acquire the write lock
             stamp = stampedLock.tryWriteLock(12, TimeUnit.MILLISECONDS);
 
             if (stamp == 0L) {
-                System.out.println(Thread.currentThread().getName() + " failed to get lock for seat-" + this.id);
+                System.out.println(booker.getName() + " failed to get lock for seat-" + this.id);
                 return false; // Could not acquire lock
             }
 
             // Since we have the write lock, we can directly check isAvailable
             if (!this.isAvailable) {
-                System.out.println(Thread.currentThread().getName() + " got the lock for seat-" + this.id + " but it's too late ~");
+                System.out.println(booker.getName() + " got the lock for seat-" + this.id + " but it's too late ~");
                 return false;
             }
 
             long startTime = System.currentTimeMillis();
 
-            System.out.println(Thread.currentThread().getName() + " got the lock for seat-" + this.id);
+            System.out.println(booker.getName() + " got the lock for seat-" + this.id);
 
             // Simulate a chance of delay (e.g., due to network delay or user indecision)
-            this.simulateBookingSession();
+            this.simulateBookingSession(booker);
 
             // Check if the total time taken exceeds the allowed 10 ms
             if (System.currentTimeMillis() - startTime >= 10) {
@@ -100,7 +103,7 @@ public class Seat {
             // Critical section: Mark the seat as booked
             this.isAvailable = false; // Set seat to not available
 
-            System.out.println(Thread.currentThread().getName() + " successfully booked the seat.");
+            System.out.println(booker.getName() + " successfully booked the seat.");
             return true;
 
         } catch (InterruptedException e) {
@@ -117,13 +120,13 @@ public class Seat {
         }
     }
 
-    public void simulateBookingSession() throws InterruptedException {
+    public void simulateBookingSession(Booker booker) throws InterruptedException {
         Random rand = new Random();
         boolean simulateTimeout = rand.nextBoolean();
 
         // Randomly decide if booking session should simulate a delay (50% chance)
         if (simulateTimeout) {
-            System.out.println(Thread.currentThread().getName() + " is experiencing a delay...");
+            System.out.println(booker.getName() + " is experiencing a delay...");
             Thread.sleep(10); // Introduce delay of 10 ms
         }
     }

@@ -1,12 +1,9 @@
 package apd.booking;
-
-
 import apd.concert.Concert;
 
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
-import apd.booking.*;
 import apd.concert.*;
 
 public class BookingTask2 implements Callable<List<Booking>> {

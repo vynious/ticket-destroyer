@@ -1,35 +1,23 @@
 package apd;
 
+import apd.booking.Booker;
+import apd.booking.BookingTask3;
 import apd.concert.Concert;
 import apd.concert.Seat;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class Scenario3 {
 
-    private final Concert concert;
     private final ExecutorService execSvc;
 
-    public Scenario3(Concert concert, int numOfThreads) {
-        this.concert = concert;
+    public Scenario3(int numOfThreads) {
         this.execSvc = Executors.newFixedThreadPool(numOfThreads);
     }
 
-    public Future<String> bookSeat(int seatId) {
-        return execSvc.submit(() -> {
-            String threadName = Thread.currentThread().getName();
-            boolean result = false;
-            Seat seat = concert.getSeatById(seatId);
-            System.out.printf("%s is attempting to book seat-%s\n",threadName ,seatId);
-            if (seat != null) {
-                result = seat.bookSeatWithTDL();
-            }
-            return String.format("Thread: %s, Booking Result: %s", threadName, result ? "Success" : "Failed");
-        });
+    public Future<String> book(Callable<String> task) {
+        return execSvc.submit(task);
     }
 
     public void shutdown() {
@@ -60,20 +48,28 @@ public class Scenario3 {
         *       - release lock for seat
         * */
 
-        int numOfBookers = 100;
-        int numOfSeats = 20;
+        int numOfBookers = 5;
+        int numOfSeats = 3;
 
         Concert concert = new Concert.ConcertBuilder(2, numOfSeats).build();
-        Scenario3 timeDelayLocking = new Scenario3(concert, numOfBookers);
+        Scenario3 timeDelayLocking = new Scenario3(numOfBookers);
 
         List<Future<String>> results = new ArrayList<>();
+
+        // Create bookers for testing
+        List<Booker> bookers = new ArrayList<>();
+        for (int i = 1; i <= numOfBookers; i++) {
+            bookers.add(new Booker(i, "booker-" + i));
+        }
 
         Random rand = new Random();
 
         // randomly choose a seat to book
         for (int i = 0; i < numOfBookers; i++) {
             int seatId = rand.nextInt(numOfSeats) + 1;
-            results.add(timeDelayLocking.bookSeat(seatId));
+            Booker booker = bookers.get(rand.nextInt(bookers.size()));
+            BookingTask3 bt3 = new BookingTask3(booker, concert, seatId);
+            results.add(timeDelayLocking.book(bt3));
         }
 
         // Print out all the booking results
@@ -87,6 +83,12 @@ public class Scenario3 {
                 System.out.println("The booking task was interrupted.");
             }
         }
+
         timeDelayLocking.shutdown();
+
+
+        for (Booker booker : bookers) {
+            System.out.println(booker.toString());
+        }
     }
 }

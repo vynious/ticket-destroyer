@@ -1,5 +1,6 @@
 package apd.booking;
 
+import java.text.SimpleDateFormat;
 import apd.booking.*;
 import apd.concert.*;
 
@@ -20,12 +21,7 @@ public class Booking {
         this.timestamp = new Date();
     }
 
-
-    // CRUD methods
-    public void saveBooking() { /* Save apd.booking logic */ }
-    public void deleteBooking() { /* Delete apd.booking logic */ }
-    public void updateBooking() { /* Update apd.booking logic */ }
-
+    // Getters
     public Date getTimestamp() { return timestamp; }
 
     public int getConcertId() {
