@@ -17,6 +17,7 @@ public class Seat {
         this.id = id;
         this.isAvailable = true;
         this.category = category;
+        
     }
 
     public boolean bookSeat() throws InterruptedException {
