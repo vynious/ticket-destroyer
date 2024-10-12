@@ -59,7 +59,9 @@ public class Seat {
     }
 
     // Getters and setters
+    public int getId() {return id;}
     public String getName() {return name;}
+    public boolean getIsAvailable() { return isAvailable;}
     public String getCategory() { return category; }
     public StampedLock getLock(String name) {
         return LockFactory.getLock(name);

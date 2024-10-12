@@ -38,7 +38,7 @@ public class Scenario1 {
         executorService.shutdown();
     }
 
-    public void runBookingSimulation(int noOfBookers, int bookingAttempts, int contestSeats, Scenario1 bookingServiceMain) {
+    public List<Booking> runBookingSimulation(int noOfBookers, int bookingAttempts, int contestSeats, Scenario1 bookingServiceMain) {
         // Simulate multiple seat apd.booking attempts
         List<Future<String>> results = new ArrayList<>();
         Random random = new Random();
@@ -61,35 +61,59 @@ public class Scenario1 {
         for (int i = 0; i < results.size(); i++) {
             try {
                 String res = results.get(i).get(); // Retrieve the apd.booking result from each future
-                System.out.println(res);
+//                System.out.println(res);
             } catch (Exception e) {
                 System.err.println("Error during apd.booking attempt " + (i + 1) + ": " + e.getMessage());
             }
         }
 
+        ArrayList<Booking> bookingList = new ArrayList<>();
+        for (Booker booker : bookers) {
+            bookingList.addAll(booker.getBookings());
+        }
         bookingServiceMain.shutdown();
+        return bookingList;
     }
 
     public static void main(String[] args) {
         int threadCount = 1000;
-        int totalSeats = 100;
+        int totalSeats = 5;
         int bookingAttempts = 100;
         int noOfBookers = 100;
 
-        int contestSeats = 5;
+        int contestSeats = totalSeats;
 
 
         System.out.println("------- NOT SAFE -------");
-        Concert concert2 = new Concert.ConcertBuilder(1, totalSeats).build();
-        Scenario1 threadNotSafeBookingSvc = new Scenario1(concert2, threadCount, false); // Using 10 threads
-        threadNotSafeBookingSvc.runBookingSimulation(noOfBookers, bookingAttempts, contestSeats, threadNotSafeBookingSvc);
+        // Create a concert builder
+        Concert.ConcertBuilder concertBuilder = new Concert.ConcertBuilder(1);
+        // Adding seats to the concert
+        for (int i = 1; i <= totalSeats; i++) {
+            concertBuilder.addSeat(i, new Seat(i, "Standard"));
+        }
+        // Build a concert object
+        Concert concertUnsafe = concertBuilder.build();
+        Scenario1 threadNotSafeBookingSvc = new Scenario1(concertUnsafe, threadCount, false); // Using 10 threads
+        List<Booking> bookingUnsafe = threadNotSafeBookingSvc.runBookingSimulation(noOfBookers, bookingAttempts, contestSeats, threadNotSafeBookingSvc);
 
-        System.out.println();
+        // Carry out test case
+        ScenarioTest.testScenario(concertUnsafe,bookingUnsafe);
+
+
 
         System.out.println("------- SAFE -------");
-        Concert concert = new Concert.ConcertBuilder(1, totalSeats).build();
-        Scenario1 threadSafeBookingSvc = new Scenario1(concert, threadCount, true); // Using 10 threads
-        threadSafeBookingSvc.runBookingSimulation(noOfBookers, bookingAttempts, contestSeats, threadSafeBookingSvc);
+        // Create a concert builder
+        Concert.ConcertBuilder concertBuilder2 = new Concert.ConcertBuilder(2);
+        // Adding seats to the concert
+        for (int i = 1; i <= totalSeats; i++) {
+            concertBuilder2.addSeat(i, new Seat(i, "Standard"));
+        }
+        // Build a concert object
+        Concert concertSafe = concertBuilder2.build();
+        Scenario1 threadSafeBookingSvc = new Scenario1(concertSafe, threadCount, true); // Using 10 threads
+        List<Booking> bookingSafe = threadSafeBookingSvc.runBookingSimulation(noOfBookers, bookingAttempts, contestSeats, threadSafeBookingSvc);
 
+        // Carry out test case
+        ScenarioTest.testScenario(concertSafe,bookingSafe);
     }
 }

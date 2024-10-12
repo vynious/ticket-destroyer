@@ -1,6 +1,7 @@
 package apd;
 
 import apd.booking.Booker;
+import apd.booking.Booking;
 import apd.booking.BookingTask3;
 import apd.concert.Concert;
 import apd.concert.Seat;
@@ -34,10 +35,16 @@ public class Scenario3 {
         *   5. case 2: [unsuccessful booking]
         * */
 
-        int numOfBookers = 5;
-        int numOfSeats = 3;
-
-        Concert concert = new Concert.ConcertBuilder(2, numOfSeats).build();
+        int numOfBookers = 50;
+        int numOfSeats = 30;
+        // Create a concert builder
+        Concert.ConcertBuilder concertBuilder = new Concert.ConcertBuilder(2);
+        // Adding seats to the concert
+        for (int i = 1; i <= numOfSeats; i++) {
+            concertBuilder.addSeat(i, new Seat(i, "Standard"));
+        }
+        // Build a concert object
+        Concert concert = concertBuilder.build();
         Scenario3 timeDelayLocking = new Scenario3(numOfBookers);
 
         List<Future<String>> results = new ArrayList<>();
@@ -72,9 +79,12 @@ public class Scenario3 {
 
         timeDelayLocking.shutdown();
 
-
+        ArrayList<Booking> bookingList = new ArrayList<>();
         for (Booker booker : bookers) {
             System.out.println(booker.toString());
+            bookingList.addAll(booker.getBookings());
         }
+        // Carry out test case
+        ScenarioTest.testScenario(concert,bookingList);
     }
 }

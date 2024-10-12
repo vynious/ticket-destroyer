@@ -25,7 +25,7 @@ public class BookingTask3 implements Callable<String> {
             Seat seat = concert.getSeatById(seatId);
             System.out.printf("%s is attempting to book seat-%s\n",bookerName ,seatId);
             if (seat != null) {
-                result = seat.bookSeatWithTDL(booker);
+                result = concert.bookSeatTDL(seatId, booker);
             }
             if (result) {
                 booker.addBooking(new Booking(booker.getId(), concert.getId(), seatId));

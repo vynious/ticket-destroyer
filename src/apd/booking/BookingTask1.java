@@ -34,10 +34,10 @@ public class BookingTask1 implements Callable<String> {
             String resultMessage;
             if (success) {
                 bookingCounter.incrementAndGet();
-                resultMessage = String.format("%s Booker ID %s: Seat ID %d - Successful. Seats Left: %d", Thread.currentThread().getName(),
+                resultMessage = String.format("%s Booker ID %s: Seat ID %d - Successful. Seats Left: %d", booker.getName(),
                         bookerId, seatId, concert.getSeatsAvailable());
             } else {
-                resultMessage = String.format("%s Booker ID %s: Seat ID %d - Failed. Seats Left: %d", Thread.currentThread().getName(),
+                resultMessage = String.format("%s Booker ID %s: Seat ID %d - Failed. Seats Left: %d", booker.getName(),
                         bookerId, seatId, concert.getSeatsAvailable());
             }
             return resultMessage;

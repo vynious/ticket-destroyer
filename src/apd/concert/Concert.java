@@ -1,5 +1,7 @@
 package apd.concert;
 
+import apd.booking.Booker;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +15,6 @@ public class Concert {
     // Seat Management
     private final AtomicInteger seatsAvailable; // Tracks available seats in a thread-safe way
     private final Map<Integer, Seat> seatMap;   // Map of seat IDs to Seat objects
-    private final StampedLock lock = new StampedLock(); // Lock for thread-safe operations
 
     // ========  Instantiation Methods ======= //
 
@@ -22,7 +23,6 @@ public class Concert {
         this.totalSeats = builder.totalSeats;
         this.seatsAvailable = new AtomicInteger(builder.totalSeats); // Initially all seats are available
         this.seatMap = builder.seatMap;
-        this.seedSeats();
     }
 
     // Thread-safe method to book a seat in the concert
@@ -44,24 +44,14 @@ public class Concert {
         return success;
     }
 
-    public void minusSeat() {
-        if (seatsAvailable.get() > 0) {
-            seatsAvailable.getAndDecrement();
+    // Thread-safe method to book a seat in the concert
+    public boolean bookSeatTDL(int seatId, Booker booker) throws InterruptedException {
+        Seat seat = seatMap.get(seatId);
+        if (seat != null && seat.bookSeatWithTDL(booker)) { // Attempt to book the seat using the Seat class's method
+            seatsAvailable.decrementAndGet(); // Decrement the count of available seats if booking is successful
+            return true;
         }
-    }
-
-    public void addSeat() {
-        if (seatsAvailable.get() < totalSeats) {
-            this.seatsAvailable.getAndIncrement();
-        }
-    }
-
-    private void seedSeats() {
-        for (int i = 1; i <= this.totalSeats; i++) {
-            int catNum = (i + 19) / 20; // Categorize seats based on number
-            String category = "CAT" + catNum;
-            seatMap.put(i, new Seat(i, category));
-        }
+        return false; // Seat was already booked or does not exist
     }
 
     // Getters
@@ -75,10 +65,6 @@ public class Concert {
 
     public Seat getSeatById(int seatId) {
         return seatMap.get(seatId);
-    }
-
-    public StampedLock getLock() {
-        return this.lock;
     }
 
     public Map<Integer, Seat> getSeatMap() {
@@ -112,16 +98,16 @@ public class Concert {
 
     public static class ConcertBuilder {
         private final int id; // Required
-        private final int totalSeats; // Required
+        private int totalSeats; // Required
         private final Map<Integer, Seat> seatMap; // Optional
 
-        public ConcertBuilder(int id, int totalSeats) {
+        public ConcertBuilder(int id) {
             this.id = id;
-            this.totalSeats = totalSeats;
             this.seatMap = new ConcurrentHashMap<>(); // Initialize seatMap here
         }
 
         public ConcertBuilder addSeat(int seatNumber, Seat seat) {
+            this.totalSeats++;
             this.seatMap.put(seatNumber, seat);
             return this;
         }
