@@ -85,6 +85,7 @@ public class Scenario3 {
             bookingList.addAll(booker.getBookings());
         }
         // Carry out test case
+        System.out.println("------- SAFE -------");
         ScenarioTest.testScenario(concert,bookingList);
     }
 }

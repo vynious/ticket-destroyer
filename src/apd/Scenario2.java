@@ -20,6 +20,7 @@ public class Scenario2 {
         int noOfUsers = 1000;  // Number of users trying to book seats
 
         // Simulate booking without semaphore
+        System.out.println("------- NOT SAFE -------");
         System.out.println("Running without semaphore...");
         ExecutorService executorServiceWO = Executors.newFixedThreadPool(1000);
         // Create a concert builder
@@ -43,8 +44,9 @@ public class Scenario2 {
 
 
         // Simulate booking with semaphore
-        ExecutorService executorServiceW = Executors.newFixedThreadPool(10);
+        System.out.println("------- SAFE -------");
         System.out.println("Running with semaphore...");
+        ExecutorService executorServiceW = Executors.newFixedThreadPool(10);
         // Create a concert builder
         Concert.ConcertBuilder concertBuilderWsem = new Concert.ConcertBuilder(2);
         // Adding seats to the concert
